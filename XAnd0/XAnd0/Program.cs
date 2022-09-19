@@ -141,10 +141,13 @@ while (true)
         if (key == ConsoleKey.DownArrow && j <= 3) j += 2;
         if (key == ConsoleKey.Spacebar)
         {
-            battleField[j / 2,i /2] = player;
-            if (player == 1) player = 2;
-            else player = 1;
-            break;
+            if (battleField[j / 2, i / 2] == 0)
+            {
+                battleField[j / 2, i / 2] = player;
+                if (player == 1) player = 2;
+                else player = 1;
+                break;
+            }
         }
         if (key == ConsoleKey.Escape)
         {
