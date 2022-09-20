@@ -117,7 +117,7 @@ bool Cont(int turn, bool winner, int player, bool quit)
     }
 }
 
-int[,] battleField = new int[3,3] { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+int[,] field = new int[3,3] { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
 int player = 1;
 int turn = 0;
 bool winner = false;
@@ -128,9 +128,9 @@ while (true)
     Console.Clear();
     cont = Cont(turn, winner, player, quit);
     if (cont == false) break; 
-    PrintField(battleField);
-    int i = CheckI(battleField);
-    int j = CheckJ(battleField);
+    PrintField(field);
+    int i = CheckI(field);
+    int j = CheckJ(field);
     while (true)
     {
         Console.SetCursorPosition(i, j + 1);
@@ -141,9 +141,9 @@ while (true)
         if (key == ConsoleKey.DownArrow && j <= 3) j += 2;
         if (key == ConsoleKey.Spacebar)
         {
-            if (battleField[j / 2, i / 2] == 0)
+            if (field[j / 2, i / 2] == 0)
             {
-                battleField[j / 2, i / 2] = player;
+                field[j / 2, i / 2] = player;
                 if (player == 1) player = 2;
                 else player = 1;
                 break;
@@ -156,7 +156,7 @@ while (true)
         }
     }
     turn++;
-    winner = CheckWinner(battleField);
+    winner = CheckWinner(field);
 }
 
 //Console.Read();
