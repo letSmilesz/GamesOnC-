@@ -28,21 +28,7 @@ int[] Ships(int howMuchShips)
     else return stop;
 }
 
-void PrintShips ()
-{
-    while (true)
-    {
-        int howMuchShips = 0;
-        int[] actualShip = Ships(howMuchShips);
-        if (actualShip[0] == 0) break;
-        else
-        {
-            //функция вывода корабля на поле, перемещения и поворота
-            howMuchShips++;
-        }
 
-    }
-}
 /* while (true)
 {
     Console.SetCursorPosition(i, j + 1);
@@ -98,35 +84,35 @@ void PrintField(int[,] arr, bool begin)
     }
 }
 
-//int CheckI (int[,] arr)
-//{
-//    for (int i = 0; i < arr.GetLength(0); i++)
-//    {
-//        for (int j = 0; j < arr.GetLength(1); j++)
-//        {
-//            if (arr[i, j] == 0)
-//            {
-//                return i;
-//            }
-//        }
-//    }
-//    return 0;
-//}
+int CheckI(int[,] arr)
+{
+    for (int i = 0; i < arr.GetLength(0); i++)
+    {
+        for (int j = 0; j < arr.GetLength(1); j++)
+        {
+            if (arr[i, j] == 0)
+            {
+                return i;
+            }
+        }
+    }
+    return 0;
+}
 
-//int CheckJ(int[,] arr)
-//{
-//    for (int i = 0; i < arr.GetLength(0); i++)
-//    {
-//        for (int j = 0; j < arr.GetLength(1); j++)
-//        {
-//            if (arr[i, j] == 0)
-//            {
-//                return j;
-//            }
-//        }
-//    }
-//    return 0;
-//}
+int CheckJ(int[,] arr)
+{
+    for (int i = 0; i < arr.GetLength(0); i++)
+    {
+        for (int j = 0; j < arr.GetLength(1); j++)
+        {
+            if (arr[i, j] == 0)
+            {
+                return j;
+            }
+        }
+    }
+    return 0;
+}
 
 bool CheckWinner (int[,] arr, int booms1, int booms2)
 {
@@ -160,5 +146,72 @@ bool begin = false;
 int[,] field1 = new int [10,10];
 PrintField(field1, begin);
 int[,] field2 = new int [10,10];
+bool quit = false;
 
-Console.Read();
+bool PrintShips(int[,] field)
+{
+    while (true)
+    {
+        int howMuchShips = 0;
+        int[] actualShip = Ships(howMuchShips);
+        if (actualShip[0] == 0) break;
+        else
+        {
+            int i = CheckI(field);
+            int j = CheckJ(field);
+            while (true)
+            {
+                Console.Clear();
+                PrintField(field, begin);
+                for (int k = 0; k < actualShip.Length; k++)
+                {
+                    field[i / 2, j / 2] = actualShip[k];
+                    j+=2;
+                }
+                j -= actualShip.Length-1;
+                Console.SetCursorPosition(i, j);
+                var key = Console.ReadKey(true).Key;
+                if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
+                if (key == ConsoleKey.RightArrow && j <= field.GetLength(0)) j += 2;
+                if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
+                if (key == ConsoleKey.DownArrow && i <= field.GetLength(1)) i += 2;
+                if (key == ConsoleKey.Z)
+                {
+                    int help = i;
+                    i = j;
+                    j = help;
+                }
+                if (key == ConsoleKey.Spacebar)
+                {
+                    int check = 0;
+                    for (int k = 0; k < actualShip.Length; k++)
+                    {
+                        if (field[i, j] == 0) check++;
+                        j++;
+                    }
+                    if (check == actualShip.Length - 1)//проверить занятость всех клеток
+                    {
+                        //for (int k = 0; k < actualShip.Length; k++)
+                        //{
+                        //    field[i, j] = actualShip[k];
+                        //    j++;
+                        //}
+                        howMuchShips++;
+                        break;
+                    }
+                }
+                if (key == ConsoleKey.Escape)
+                {
+                    return true;
+                }
+            }
+            //функция вывода корабля на поле, перемещения и поворота
+        }
+    }
+    return false;
+}
+quit = PrintShips(field1);
+PrintField(field1, begin);
+
+
+//Console.Read();
