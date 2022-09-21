@@ -30,8 +30,7 @@ int[] Ships(int howMuchShips)
 
 void PrintField(int[,] arr, bool begin)
 {
-    string line = "-+-+-+-+-+-+-+-+-+-";
-    string vert = "|";
+    string line = "-+-+-+-+-+-+-+-+-+-", vert = "|";
     for (int i = 0; i < arr.GetLength(0); i++)
     {
         for (int j = 0; j < arr.GetLength(1); j++)
@@ -116,6 +115,7 @@ bool Cont(bool winner, int player, bool quit)
         return true;
     }
 }
+
 bool begin = false;
 int[,] field1 = new int [10,10];
 PrintField(field1, begin);
@@ -185,14 +185,13 @@ bool PrintShips(int[,] field)
                 {
                     return true;
                 }
-                /*if (key != ConsoleKey.Spacebar) //удаление старого расположения корабля
+                if (key != ConsoleKey.Spacebar) //удаление старого расположения корабля
                 {
-                    int helpJ = j;
-                    int helpI = i;
-                    i /= 2;
-                    j /= 2;
-                    if (key == ConsoleKey.LeftArrow && j > 0) 
+                    int helpJ = new int(), helpI = new int();
+                    if (key == ConsoleKey.LeftArrow && j >= 0) 
                     {
+                        helpJ = j;
+                        j /= 2;
                         for (int k = 0; k < actualShip.Length; k++)
                         {
                             field[i, j+1] = 0;
@@ -200,8 +199,10 @@ bool PrintShips(int[,] field)
                         }
                         j = helpJ;
                     }
-                    if (key == ConsoleKey.RightArrow && j <= field.GetLength(1)) 
+                    if (key == ConsoleKey.RightArrow && j <= field.GetLength(1)*2-2) 
                     {
+                        helpJ = j;
+                        j /= 2;
                         for (int k = 0; k < actualShip.Length; k++)
                         {
                             field[i, j-1] = 0;
@@ -209,25 +210,31 @@ bool PrintShips(int[,] field)
                         }
                         j = helpJ;
                     }
-                    if (key == ConsoleKey.UpArrow && i > 0)
+                    if (key == ConsoleKey.UpArrow && i >= 0)
                     {
+                        helpI = i;
+                        i /= 2;
                         for (int k = 0; k < actualShip.Length; k++)
                         {
                             field[i+1, j] = 0;
                             j++;        
                         }
                         i = helpI;
+                        j -= actualShip.Length;
                     }
-                    if (key == ConsoleKey.DownArrow && i <= field.GetLength(0))
+                    if (key == ConsoleKey.DownArrow && i <= field.GetLength(0)*2-2)
                     {
+                        helpI = i;
+                        i /= 2;
                         for (int k = 0; k < actualShip.Length; k++)
                         {
                             field[i-1, j] = 0;
                             j++;        
                         }
                         i = helpI;
+                        j -= actualShip.Length;
                     }
-                }*/
+                }
             }
             //функция вывода корабля на поле, перемещения и поворота
         }
