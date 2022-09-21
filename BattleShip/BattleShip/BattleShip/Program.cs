@@ -91,7 +91,6 @@ bool CheckWinner (int[,] arr, int booms1, int booms2)
 {
     if(booms1 == 20 || booms2 == 20) return true;
     return false;
-
 }
 
 bool Cont(bool winner, int player, bool quit)
@@ -109,11 +108,20 @@ bool Cont(bool winner, int player, bool quit)
     }
     else
     {
-        if (player == 1) PrintText("Ходит игрок X");
-        else PrintText("Ходит игрок 0");
+        if (player == 1) PrintText("Ходит игрок 1");
+        else PrintText("Ходит игрок 2");
         Console.WriteLine();
         return true;
     }
+}
+
+void CheckRotation(bool rotation, int i, int j)
+{
+    if (rotation) rotation = false;
+    else rotation = true;
+    int help = j;
+    j = i;
+    i = help;
 }
 
 bool begin = false;
@@ -125,6 +133,7 @@ bool quit = false;
 bool PrintShips(int[,] field)
 {
     int howMuchShips = 0;
+    bool rotation = false;
     while (true)
     {
         int[] actualShip = Ships(howMuchShips);
@@ -136,7 +145,7 @@ bool PrintShips(int[,] field)
             while (true)
             {
                 Console.Clear();
-                try
+                try //написать функцию для поворота фигуры
                 { 
                     for (int k = 0; k < actualShip.Length; k++)
                     {
@@ -160,18 +169,18 @@ bool PrintShips(int[,] field)
                     }
                 }
                 PrintField(field, begin);
-                Console.SetCursorPosition(j, i);
+                if (rotation) Console.SetCursorPosition(i, j);
+                else Console.SetCursorPosition(j, i);
+                
                 var key = Console.ReadKey(true).Key;
                 if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
-                else if (key == ConsoleKey.RightArrow) j += 2; //возможен косяк с кораблями != 4
+                else if (key == ConsoleKey.RightArrow) j += 2;
                 else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
                 else if (key == ConsoleKey.DownArrow 
                     && i < field.GetLength(0) * 2 - 2) i += 2;
                 else if (key == ConsoleKey.Z)
                 {
-                    int help = i;
-                    i = j;
-                    j = help;
+                    CheckRotation(rotation, i, j);   
                 }
                 /*else if (key == ConsoleKey.Spacebar)
                 {
@@ -197,7 +206,7 @@ bool PrintShips(int[,] field)
                     return true;
                 }
                 if (key != ConsoleKey.Spacebar) //удаление старого расположения корабля
-                {
+                {//написать функцию для стирания повернутой фигуры
                     int helpJ = j / 2, helpI = i / 2;
                     if (key == ConsoleKey.LeftArrow && j >= 0) 
                     {
