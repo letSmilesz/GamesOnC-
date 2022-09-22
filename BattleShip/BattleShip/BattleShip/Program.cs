@@ -115,13 +115,158 @@ bool Cont(bool winner, int player, bool quit)
     }
 }
 
-void CheckRotation(bool rotation, int i, int j)
+bool CheckRotation(bool rotation, int i, int j)
 {
-    if (rotation) rotation = false;
-    else rotation = true;
     int help = j;
     j = i;
     i = help;
+    if (rotation) return false;
+    else return true;
+}
+
+void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
+{ 
+    if (rotation)
+    {
+        try
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[i / 2, j / 2] = array2[k];
+                i += 2;
+            }
+            i -= array2.Length * 2;
+        }
+        catch (System.IndexOutOfRangeException) 
+        {            
+            if (i/2 + array2.Length > array1.GetLength(1))
+            {
+                i -= array2.Length * 2;
+                for (int k = 0; k < array2.Length; k++)
+                {
+                    array1[i / 2, j / 2] = array2[k];
+                    i += 2;
+                }
+                i -= array2.Length * 2;
+            }
+        }
+    }
+    else
+    { 
+        try //написать функцию для поворота фигуры
+        { 
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[i / 2, j / 2] = array2[k];
+                j += 2;
+            }
+            j -= array2.Length * 2;
+        }
+        catch (System.IndexOutOfRangeException) 
+        {    
+            if (j/2 + array2.Length > array1.GetLength(1))
+            {
+                j -= array2.Length * 2;
+                for (int k = 0; k < array2.Length; k++)
+                {
+                    array1[i / 2, j / 2] = array2[k];
+                    j += 2;
+                }
+                j -= array2.Length * 2;
+            }
+        }
+    }
+}
+
+void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, System.ConsoleKey key)
+{ 
+    int helpJ = j / 2, helpI = i / 2;
+    if (rotation)
+    {
+        if (key == ConsoleKey.LeftArrow && i <= array1.GetLength(1)*2-2) 
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI, helpJ+1] = 0;
+                helpI++;
+            }
+        }
+        else if (key == ConsoleKey.RightArrow && j > 0) 
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI, helpJ-1] = 0;
+                helpI++;
+            }
+        }
+        else if (key == ConsoleKey.UpArrow && j <= array1.GetLength(0)*2-2)//вверх по правому
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI+1, helpJ] = 0;
+                helpI++;
+            }
+        }
+        else if (key == ConsoleKey.DownArrow && j >= 0)//вниз по левому краю
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI-1, helpJ] = 0;
+                helpI++;
+            }
+        }
+        else if (key == ConsoleKey.Z)
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpJ, helpI] = 0;
+                helpJ++;        
+            }
+        }
+    }
+    else
+    {
+        if (key == ConsoleKey.LeftArrow && j >= 0) 
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI, helpJ+1] = 0;
+                helpJ++;        
+            }
+        }
+        else if (key == ConsoleKey.RightArrow && j < array1.GetLength(0)*2-4) 
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+               array1[helpI, helpJ-1] = 0;
+               helpJ++;        
+            }
+        }
+        else if (key == ConsoleKey.UpArrow && i >= 0) 
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI+1, helpJ] = 0;
+                helpJ++;        
+            }
+        }
+        else if (key == ConsoleKey.DownArrow && i <= array1.GetLength(1)*2-2) 
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI-1, helpJ] = 0;
+                helpJ++;        
+            }
+        }
+        else if (key == ConsoleKey.Z)
+        {
+            for (int k = 0; k < array2.Length; k++)
+            {
+                array1[helpI, helpJ] = 0;
+                helpJ++;        
+            }
+        }
+    }
 }
 
 bool begin = false;
@@ -145,42 +290,28 @@ bool PrintShips(int[,] field)
             while (true)
             {
                 Console.Clear();
-                try //написать функцию для поворота фигуры
-                { 
-                    for (int k = 0; k < actualShip.Length; k++)
-                    {
-                        field[i / 2, j / 2] = actualShip[k];
-                        j += 2;
-                    }
-                    j -= actualShip.Length * 2;
-                }
-                catch (System.IndexOutOfRangeException) 
-                {
-                    
-                    if (j/2 + actualShip.Length > field.GetLength(1))
-                    {
-                        j -= actualShip.Length * 2;
-                        for (int k = 0; k < actualShip.Length; k++)
-                        {
-                            field[i / 2, j / 2] = actualShip[k];
-                            j += 2;
-                        }
-                        j -= actualShip.Length * 2;
-                    }
-                }
+                AddShip(field, actualShip, i, j, rotation);
                 PrintField(field, begin);
-                if (rotation) Console.SetCursorPosition(i, j);
-                else Console.SetCursorPosition(j, i);
+                Console.SetCursorPosition(j, i);
                 
                 var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
-                else if (key == ConsoleKey.RightArrow) j += 2;
-                else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
-                else if (key == ConsoleKey.DownArrow 
-                    && i < field.GetLength(0) * 2 - 2) i += 2;
-                else if (key == ConsoleKey.Z)
+                if (rotation)
                 {
-                    CheckRotation(rotation, i, j);   
+                    if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
+                    else if (key == ConsoleKey.RightArrow
+                        && j < field.GetLength(0) * 2 - 2) j += 2;
+                    else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
+                    else if (key == ConsoleKey.DownArrow 
+                        && i / 2 < field.GetLength(1) - actualShip.Length) i += 2;
+                }
+                else
+                {
+                    if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
+                    else if (key == ConsoleKey.RightArrow
+                        && j / 2 < field.GetLength(1) - actualShip.Length) j += 2;
+                    else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
+                    else if (key == ConsoleKey.DownArrow 
+                        && i < field.GetLength(0) * 2 - 2) i += 2;
                 }
                 /*else if (key == ConsoleKey.Spacebar)
                 {
@@ -201,52 +332,17 @@ bool PrintShips(int[,] field)
                         break;
                     }
                 }*/
+                if (key != ConsoleKey.Spacebar) //удаление старого расположения корабля
+                {
+                    DeleteOldShip(field, actualShip, i, j, rotation, key);
+                }
+                if (key == ConsoleKey.Z)
+                {
+                    rotation = CheckRotation(rotation, i, j);   
+                }
                 else if (key == ConsoleKey.Escape)
                 {
                     return true;
-                }
-                if (key != ConsoleKey.Spacebar) //удаление старого расположения корабля
-                {//написать функцию для стирания повернутой фигуры
-                    int helpJ = j / 2, helpI = i / 2;
-                    if (key == ConsoleKey.LeftArrow && j >= 0) 
-                    {
-                        for (int k = 0; k < actualShip.Length; k++)
-                        {
-                            field[helpI, helpJ+1] = 0;
-                            helpJ++;        
-                        }
-
-                    }
-                    if (key == ConsoleKey.RightArrow && j < field.GetLength(1)*2-2) 
-                    {
-
-                        for (int k = 0; k < actualShip.Length; k++)
-                        {
-                            field[helpI, helpJ-1] = 0;
-                            helpJ++;        
-                        }
-
-                    }
-                    if (key == ConsoleKey.UpArrow && i >= 0)
-                    {
-                        
-                        for (int k = 0; k < actualShip.Length; k++)
-                        {
-                            field[helpI+1, helpJ] = 0;
-                            helpJ++;        
-                        }
-
-                    }
-                    if (key == ConsoleKey.DownArrow && i <= field.GetLength(0)*2-2)
-                    {
-
-                        for (int k = 0; k < actualShip.Length; k++)
-                        {
-                            field[helpI-1, helpJ] = 0;
-                            helpJ++;        
-                        }
-
-                    }
                 }
             }
             //функция вывода корабля на поле, перемещения и поворота
@@ -257,4 +353,4 @@ bool PrintShips(int[,] field)
 quit = PrintShips(field1);
 
 
-//Console.Read();
+Console.Read();
