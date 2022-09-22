@@ -181,92 +181,58 @@ void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
 void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, System.ConsoleKey key)
 { 
     int helpJ = j / 2, helpI = i / 2;
-    if (rotation)
+    if (key == ConsoleKey.LeftArrow && (i <= array1.GetLength(1)*2-2 || j >= 0)) 
     {
-        if (key == ConsoleKey.LeftArrow && i <= array1.GetLength(1)*2-2) 
+        for (int k = 0; k < array2.Length; k++)
         {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI, helpJ+1] = 0;
-                helpI++;
-            }
-        }
-        else if (key == ConsoleKey.RightArrow && j > 0) 
-        {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI, helpJ-1] = 0;
-                helpI++;
-            }
-        }
-        else if (key == ConsoleKey.UpArrow && j <= array1.GetLength(0)*2-2)//вверх по правому
-        {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI+1, helpJ] = 0;
-                helpI++;
-            }
-        }
-        else if (key == ConsoleKey.DownArrow && j >= 0)//вниз по левому краю
-        {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI-1, helpJ] = 0;
-                helpI++;
-            }
-        }
-        else if (key == ConsoleKey.Z)
-        {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpJ, helpI] = 0;
-                helpJ++;        
-            }
+            array1[helpI, helpJ+1] = 0;
+            if (rotation) helpI++;
+            else helpJ++;
         }
     }
-    else
+    else if (key == ConsoleKey.RightArrow && (j > 0 || j < array1.GetLength(0)*2-4)) 
     {
-        if (key == ConsoleKey.LeftArrow && j >= 0) 
+        for (int k = 0; k < array2.Length; k++)
         {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI, helpJ+1] = 0;
-                helpJ++;        
-            }
+            array1[helpI, helpJ-1] = 0;
+            if (rotation) helpI++;
+            else helpJ++;
         }
-        else if (key == ConsoleKey.RightArrow && j < array1.GetLength(0)*2-4) 
+    }
+    else if (key == ConsoleKey.UpArrow && (j <= array1.GetLength(0)*2-2 || i >= 0))//вверх по правому
+    {
+        for (int k = 0; k < array2.Length; k++)
         {
-            for (int k = 0; k < array2.Length; k++)
-            {
-               array1[helpI, helpJ-1] = 0;
-               helpJ++;        
-            }
+            array1[helpI+1, helpJ] = 0;
+            if (rotation) helpI++;
+            else helpJ++;
         }
-        else if (key == ConsoleKey.UpArrow && i >= 0) 
+    }
+    else if (key == ConsoleKey.DownArrow && (j >= 0 || i <= array1.GetLength(1)*2-2))//вниз по левому краю
+    {
+        for (int k = 0; k < array2.Length; k++)
         {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI+1, helpJ] = 0;
-                helpJ++;        
-            }
+            array1[helpI-1, helpJ] = 0;
+            if (rotation) helpI++;
+            else helpJ++;
         }
-        else if (key == ConsoleKey.DownArrow && i <= array1.GetLength(1)*2-2) 
+    }
+    else if (key == ConsoleKey.Z)
+    {
+        for (int k = 0; k < array2.Length; k++)
         {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[helpI-1, helpJ] = 0;
-                helpJ++;        
-            }
-        }
-        else if (key == ConsoleKey.Z)
-        {
-            for (int k = 0; k < array2.Length; k++)
+            if (rotation) 
             {
                 array1[helpI, helpJ] = 0;
-                helpJ++;        
+                helpI++; 
+            }
+            else
+            {
+                array1[helpI, helpJ] = 0;
+                helpJ++; 
             }
         }
-    }
+    }    
 }
 
 bool begin = false;
