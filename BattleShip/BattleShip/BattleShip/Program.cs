@@ -14,7 +14,7 @@ void NewLine()
 }
 
 int[] Ships(int howMuchShips)
-{
+{ 
     int[] linkor = new int[4] { 3, 3, 3, 3 };//1
     int[] creyser = new int[3] { 3, 3, 3 };//2
     int[] esminec = new int[2] { 3, 3 };//3
@@ -28,20 +28,23 @@ int[] Ships(int howMuchShips)
     else return stop;
 }
 
-void PrintField(int[,] arr, bool begin)
+void PrintField(int[,,] arr, bool begin, int now = new int())
 {
     string line = "-+-+-+-+-+-+-+-+-+-", vert = "|";
     for (int i = 0; i < arr.GetLength(0); i++)
     {
         for (int j = 0; j < arr.GetLength(1); j++)
         {
-            if (arr[i, j] == 0) Console.Write(" ");
-            else if (arr[i, j] == 1) Console.Write("о");
-            else if (arr[i, j] == 2) Console.Write("Ж");
-            else if (arr[i, j] == 3)
+            if (begin) now = arr[i, j, 1];
+            else now = arr[i, j, 0];
+
+            if (now == 0) Console.Write(" ");//ничего
+            else if (now == 1) Console.Write("о");//промах
+            else if (now == 2) Console.Write("Ж");//попадание
+            else if (now == 3)
             {
-                if (begin) Console.Write(" ");
-                else Console.Write("#");
+                if (begin) Console.Write(" ");//отображение корабля во время игры
+                else Console.Write("#");//во время расстановки
             }
             if (j < arr.GetLength(1) - 1)
             {
@@ -50,20 +53,23 @@ void PrintField(int[,] arr, bool begin)
         }
         if (i < arr.GetLength(0) - 1)
         {
-            Console.WriteLine();
+            NewLine();
             Console.Write(line);
-            Console.WriteLine();
+            NewLine();
         }
     }
 }
 
-int CheckI(int[,] arr)
+int CheckI(int[,,] arr, bool begin, int now = new int())
 {
     for (int i = 0; i < arr.GetLength(0); i++)
     {
         for (int j = 0; j < arr.GetLength(1); j++)
         {
-            if (arr[i, j] == 0)
+            if (begin) now = arr[i, j, 1];
+            else now = arr[i, j, 0];
+
+            if (now == 0)
             {
                 return i;
             }
@@ -72,13 +78,16 @@ int CheckI(int[,] arr)
     return 0;
 }
 
-int CheckJ(int[,] arr)
+int CheckJ(int[,,] arr, bool begin, int now = new int())
 {
     for (int i = 0; i < arr.GetLength(0); i++)
     {
         for (int j = 0; j < arr.GetLength(1); j++)
         {
-            if (arr[i, j] == 0)
+            if (begin) now = arr[i, j, 1];
+            else now = arr[i, j, 0];
+
+            if (now == 0)
             {
                 return j;
             }
@@ -87,7 +96,7 @@ int CheckJ(int[,] arr)
     return 0;
 }
 
-bool CheckWinner (int[,] arr, int booms1, int booms2)
+bool CheckWinner (int[,,] arr, int booms1, int booms2)
 {
     if(booms1 == 20 || booms2 == 20) return true;
     return false;
@@ -115,16 +124,13 @@ bool Cont(bool winner, int player, bool quit)
     }
 }
 
-bool CheckRotation(bool rotation, int i, int j)
+bool CheckRotation(bool rotation)
 {
-    int help = j;
-    j = i;
-    i = help;
     if (rotation) return false;
     else return true;
 }
 
-void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
+void AddShip(int[,,] array1, int[] array2, int i, int j, bool rotation) //нужно сократить
 { 
     if (rotation)
     {
@@ -132,7 +138,7 @@ void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
         {
             for (int k = 0; k < array2.Length; k++)
             {
-                array1[i / 2, j / 2] = array2[k];
+                array1[i / 2, j / 2, 0] = array2[k];
                 i += 2;
             }
             i -= array2.Length * 2;
@@ -144,7 +150,7 @@ void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
                 i -= array2.Length * 2;
                 for (int k = 0; k < array2.Length; k++)
                 {
-                    array1[i / 2, j / 2] = array2[k];
+                    array1[i / 2, j / 2, 0] = array2[k];
                     i += 2;
                 }
                 i -= array2.Length * 2;
@@ -157,7 +163,7 @@ void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
         { 
             for (int k = 0; k < array2.Length; k++)
             {
-                array1[i / 2, j / 2] = array2[k];
+                array1[i / 2, j / 2, 0] = array2[k];
                 j += 2;
             }
             j -= array2.Length * 2;
@@ -169,7 +175,7 @@ void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
                 j -= array2.Length * 2;
                 for (int k = 0; k < array2.Length; k++)
                 {
-                    array1[i / 2, j / 2] = array2[k];
+                    array1[i / 2, j / 2, 0] = array2[k];
                     j += 2;
                 }
                 j -= array2.Length * 2;
@@ -178,14 +184,14 @@ void AddShip(int[,] array1, int[] array2, int i, int j, bool rotation)
     }
 }
 
-void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, System.ConsoleKey key)
+void DeleteOldShip (int[,,] array1, int[] array2, int i, int j, bool rotation, System.ConsoleKey key)
 { 
     int helpJ = j / 2, helpI = i / 2;
     if (key == ConsoleKey.LeftArrow && (i <= array1.GetLength(1)*2-2 || j >= 0)) 
     {
         for (int k = 0; k < array2.Length; k++)
         {
-            array1[helpI, helpJ+1] = 0;
+            array1[helpI, helpJ+1, 0] = 0;
             if (rotation) helpI++;
             else helpJ++;
         }
@@ -194,7 +200,7 @@ void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, Sy
     {
         for (int k = 0; k < array2.Length; k++)
         {
-            array1[helpI, helpJ-1] = 0;
+            array1[helpI, helpJ-1, 0] = 0;
             if (rotation) helpI++;
             else helpJ++;
         }
@@ -203,7 +209,7 @@ void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, Sy
     {
         for (int k = 0; k < array2.Length; k++)
         {
-            array1[helpI+1, helpJ] = 0;
+            array1[helpI+1, helpJ, 0] = 0;
             if (rotation) helpI++;
             else helpJ++;
         }
@@ -212,7 +218,7 @@ void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, Sy
     {
         for (int k = 0; k < array2.Length; k++)
         {
-            array1[helpI-1, helpJ] = 0;
+            array1[helpI-1, helpJ, 0] = 0;
             if (rotation) helpI++;
             else helpJ++;
         }
@@ -223,12 +229,12 @@ void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, Sy
         {
             if (rotation) 
             {
-                array1[helpI, helpJ] = 0;
+                array1[helpI, helpJ, 0] = 0;
                 helpI++; 
             }
             else
             {
-                array1[helpI, helpJ] = 0;
+                array1[helpI, helpJ, 0] = 0;
                 helpJ++; 
             }
         }
@@ -236,12 +242,12 @@ void DeleteOldShip (int[,] array1, int[] array2, int i, int j, bool rotation, Sy
 }
 
 bool begin = false;
-int[,] field1 = new int [10,10];
+int[,,] field1 = new int [10, 10, 2];
 PrintField(field1, begin);
-int[,] field2 = new int [10,10];
+int[,,] field2 = new int [10, 10, 2];
 bool quit = false;
 
-bool PrintShips(int[,] field)
+bool PrintShips(int[,,] field)
 {
     int howMuchShips = 0;
     bool rotation = false;
@@ -251,8 +257,8 @@ bool PrintShips(int[,] field)
         if (actualShip[0] == 0) break;
         else
         {
-            int i = CheckI(field);
-            int j = CheckJ(field);
+            int i = CheckI(field, begin);
+            int j = CheckJ(field, begin);
             while (true)
             {
                 Console.Clear();
@@ -304,7 +310,7 @@ bool PrintShips(int[,] field)
                 }
                 if (key == ConsoleKey.Z)
                 {
-                    rotation = CheckRotation(rotation, i, j);   
+                    rotation = CheckRotation(rotation);   
                 }
                 else if (key == ConsoleKey.Escape)
                 {
