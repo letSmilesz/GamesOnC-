@@ -36,7 +36,11 @@ void PrintField(int[,,] arr, bool begin, int now = new int())
         for (int j = 0; j < arr.GetLength(1); j++)
         {
             if (begin) now = arr[i, j, 1];
-            else now = arr[i, j, 0];
+            else
+            {
+                if (arr[i, j, 1] != 0) arr[i, j, 0] = arr[i, j, 1];
+                now = arr[i, j, 0];
+            }
 
             if (now == 0) Console.Write(" ");//ничего
             else if (now == 1) Console.Write("о");//промах
