@@ -113,27 +113,12 @@ bool Cont(bool winner, int player, bool quit)
 
 void AddShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotation)
 {
-    try
+
+    for (int k = 0; k < array2.Length; k++)
     {
-        for (int k = 0; k < array2.Length; k++)
-        {
-            array1[indI / 2, indJ / 2, 0] = array2[k];
-            if (rotation) indI += 2;
-            else indJ += 2;
-        }
-    }
-    catch (System.IndexOutOfRangeException)
-    {
-        if (indI / 2 + array2.Length > array1.GetLength(0)) indI -= array2.Length * 2;
-        else if (indJ / 2 + array2.Length > array1.GetLength(1)) indJ -= array2.Length * 2;
-        {
-            for (int k = 0; k < array2.Length; k++)
-            {
-                array1[indI / 2, indJ / 2, 0] = array2[k];
-                if (rotation) indI += 2;
-                else indJ += 2;
-            }
-        }
+        array1[indI / 2, indJ / 2, 0] = array2[k];
+        if (rotation) indI += 2;
+        else indJ += 2;
     }
 }
 
@@ -143,13 +128,15 @@ void DeleteOldShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotat
     for (int k = 0; k < array2.Length; k++)
     {
         if (key == ConsoleKey.LeftArrow
-            && (indI <= array1.GetLength(1) * 2 - 2 || indJ >= 0)) array1[helpI, helpJ + 1, 0] = 0;
+        && (indI <= array1.GetLength(1) * 2 - 2 || indJ >= 0)) array1[helpI, helpJ + 1, 0] = 0;
+        else if (key == ConsoleKey.UpArrow
+        && (indJ <= array1.GetLength(0) * 2 - 2 || indI >= 0)) array1[helpI + 1, helpJ, 0] = 0;
+
+
         else if (key == ConsoleKey.RightArrow
            && (indJ > 0 || indJ < array1.GetLength(0) * 2 - 4)) array1[helpI, helpJ - 1, 0] = 0;
-        else if (key == ConsoleKey.UpArrow
-                && (indJ <= array1.GetLength(0) * 2 - 2 || indI >= 0)) array1[helpI + 1, helpJ, 0] = 0;
         else if (key == ConsoleKey.DownArrow
-            && (indJ >= 0 || indI <= array1.GetLength(1) * 2 - 2)) array1[helpI - 1, helpJ, 0] = 0;
+                    && (indJ >= 0 || indI <= array1.GetLength(1) * 2 - 2)) array1[helpI - 1, helpJ, 0] = 0;
         else if (key == ConsoleKey.Z)
         {
             if (rotation) array1[helpI, helpJ, 0] = 0;
@@ -159,6 +146,8 @@ void DeleteOldShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotat
         else helpJ++;
     }
 }
+
+
 
 bool begin = false;
 int[,,] field1 = new int[10, 10, 2];
@@ -184,25 +173,21 @@ bool PrintShips(int[,,] field)
                 AddShip2(field, actualShip, i, j, rotation);
                 PrintField(field, begin);
                 Console.SetCursorPosition(j, i);
-
                 var key = Console.ReadKey(true).Key;
-                if (rotation)
+                if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
+                else if (key == ConsoleKey.RightArrow)
                 {
-                    if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
-                    else if (key == ConsoleKey.RightArrow
-                        && j < field.GetLength(0) * 2 - 2) j += 2;
-                    else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
-                    else if (key == ConsoleKey.DownArrow
-                        && i / 2 < field.GetLength(1) - actualShip.Length) i += 2;
+                    if (rotation && j < field.GetLength(1) * 2 - 2) j += 2;
+                    else if (rotation == false &&
+                        j / 2 < field.GetLength(1) - actualShip.Length) j += 2;
                 }
-                else
+                else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
+                else if (key == ConsoleKey.DownArrow)
                 {
-                    if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
-                    else if (key == ConsoleKey.RightArrow
-                        && j / 2 < field.GetLength(1) - actualShip.Length) j += 2;
-                    else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
-                    else if (key == ConsoleKey.DownArrow
-                        && i < field.GetLength(0) * 2 - 2) i += 2;
+                    if (rotation
+                        && i / 2 < field.GetLength(0) - actualShip.Length) i += 2;
+                    else if (rotation == false &&
+                        i < field.GetLength(0) * 2 - 2) i += 2;
                 }
                 /*else if (key == ConsoleKey.Spacebar)
                 {
@@ -229,8 +214,23 @@ bool PrintShips(int[,,] field)
                 }
                 if (key == ConsoleKey.Z)
                 {
-                    if (rotation) rotation = false;
-                    else rotation = true;
+                    if (rotation)
+                    {
+                        rotation = false;
+                        if (j / 2 + actualShip.Length > field.GetLength(1))
+                        {
+                            j = (field.GetLength(1) - actualShip.Length) * 2;
+                        }
+                    }
+                    else
+                    {
+                        rotation = true;
+                        //if (i + actualShip.Length > field.GetLength(0))
+                        if (i + actualShip.Length > field.GetLength(0))
+                        {
+                            i = (field.GetLength(0) - actualShip.Length) * 2;
+                        }
+                    }
                 }
                 else if (key == ConsoleKey.Escape)
                 {
@@ -244,4 +244,4 @@ bool PrintShips(int[,,] field)
 quit = PrintShips(field1);
 
 
-Console.Read();
+//Console.Read();
