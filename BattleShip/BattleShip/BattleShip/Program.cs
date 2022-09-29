@@ -64,14 +64,13 @@ void PrintField(int[,,] arr, bool begin, int now = new int())
     }
 }
 
-int CheckIndex(int[,,] arr, bool begin, bool index, int now = new int())
+int CheckIndex(int[,,] arr, bool index, int now = new int())
 {
     for (int i = 0; i < arr.GetLength(0); i++)
     {
         for (int j = 0; j < arr.GetLength(1); j++)
         {
-            if (begin) now = arr[i, j, 1];
-            else now = arr[i, j, 0];
+            now = arr[i, j, 1];
 
             if (now == 0)
             {
@@ -139,8 +138,7 @@ void DeleteOldShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotat
                     && (indJ >= 0 || indI <= array1.GetLength(1) * 2 - 2)) array1[helpI - 1, helpJ, 0] = 0;
         else if (key == ConsoleKey.Z)
         {
-            if (rotation) array1[helpI, helpJ, 0] = 0;
-            else array1[helpI, helpJ, 0] = 0;
+            array1[helpI, helpJ, 0] = 0;
         }
         if (rotation) helpI++;
         else helpJ++;
@@ -165,8 +163,8 @@ bool PrintShips(int[,,] field)
         if (actualShip[0] == 0) break;
         else
         {
-            int i = CheckIndex(field, begin, true);
-            int j = CheckIndex(field, begin, false);
+            int i = CheckIndex(field, true);
+            int j = CheckIndex(field, false);
             while (true)
             {
                 Console.Clear();
@@ -178,7 +176,7 @@ bool PrintShips(int[,,] field)
                 else if (key == ConsoleKey.RightArrow)
                 {
                     if (rotation && j < field.GetLength(1) * 2 - 2) j += 2;
-                    else if (rotation == false &&
+                    else if (!rotation &&
                         j / 2 < field.GetLength(1) - actualShip.Length) j += 2;
                 }
                 else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
@@ -186,33 +184,67 @@ bool PrintShips(int[,,] field)
                 {
                     if (rotation
                         && i / 2 < field.GetLength(0) - actualShip.Length) i += 2;
-                    else if (rotation == false &&
+                    else if (!rotation &&
                         i < field.GetLength(0) * 2 - 2) i += 2;
                 }
-                /*else if (key == ConsoleKey.Spacebar)
+                DeleteOldShip2(field, actualShip, i, j, rotation, key);
+                if (key == ConsoleKey.Spacebar)
                 {
-                    int check = 0;
-                    for (int k = 0; k < actualShip.Length; k++)
+                    bool check = true;
+                    int helpI = i / 2;
+                    int helpJ = j / 2 - 1;
+                    if (j == 0) helpJ = j / 2;
+
+                    if (rotation)
                     {
-                        if (field[i, j] == 0) check++;
-                        j++;
+                        helpJ = j / 2;
+                        helpI = i / 2 - 1;
+                        if (i == 0) helpI = i / 2;
                     }
-                    if (check == actualShip.Length - 1)//проверить занятость всех клеток
+                    for (int k = 0; k < actualShip.Length + 2; k++) //для проверки свободных ячеек вокруг корабля и корабля 
                     {
-                        //for (int k = 0; k < actualShip.Length; k++)
-                        //{
-                        //    field[i, j] = actualShip[k];
-                        //    j++;
-                        //}
+                        if (rotation)
+                        {
+                            if (helpI < field.GetLength(0) - 1
+                                && field[helpI, helpJ, 1] != 0) check = false;
+                            if (helpI > 0
+                                 && helpI < field.GetLength(0) - 1
+                                && field[helpI, helpJ - 1, 1] != 0) check = false;
+                            if (helpJ < field.GetLength(1) - 1
+                                && helpI < field.GetLength(0) - 1
+                                && field[helpI, helpJ + 1, 1] != 0) check = false;
+                            helpI++;
+                        }
+                        else
+                        {
+                            if (helpJ < field.GetLength(1) - 1
+                                && field[helpI, helpJ, 1] != 0) check = false;
+                            if (helpI > 0
+                                 && helpJ < field.GetLength(1) - 1
+                                && field[helpI - 1, helpJ, 1] != 0) check = false;
+                            if (helpI < field.GetLength(0) - 1
+                                && helpJ < field.GetLength(1) - 1
+                                && field[helpI + 1, helpJ, 1] != 0) check = false;
+                            helpJ++;
+                        }
+                        if (!check) break;
+                    }
+
+                    if (check)//проверить занятость всех клеток
+                    {
+                        //helpI = i / 2;
+                        //helpJ = j / 2;
+                        for (int k = 0; k < actualShip.Length; k++)
+                        {
+                            field[i / 2, j / 2, 1] = actualShip[k];
+                            if (rotation) i++;
+                            else j++;
+                        }
                         howMuchShips++;
                         break;
                     }
-                }*/
-                if (key != ConsoleKey.Spacebar) //удаление старого расположения корабля
-                {
-                    DeleteOldShip2(field, actualShip, i, j, rotation, key);
                 }
-                if (key == ConsoleKey.Z)
+                else if (key == ConsoleKey.Z)
                 {
                     if (rotation)
                     {
@@ -225,7 +257,6 @@ bool PrintShips(int[,,] field)
                     else
                     {
                         rotation = true;
-                        //if (i + actualShip.Length > field.GetLength(0))
                         if (i + actualShip.Length > field.GetLength(0))
                         {
                             i = (field.GetLength(0) - actualShip.Length) * 2;
