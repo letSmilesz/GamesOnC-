@@ -37,7 +37,7 @@ dynamic UserEnter()
 int[] Ships(int howMuchShips)
 {
     int[] linkor = new int[4] { 3, 3, 3, 3 };//1
-    int[] kreyser = new int[3] { 3, 3, 3 };//2
+    int[] kreyser = new int[3] { 3, 3, 3 };//2 
     int[] esminec = new int[2] { 3, 3 };//3
     int[] kater = new int[1] { 3 };//4
     int[] stop = new int[1] { 0 };
@@ -112,7 +112,6 @@ int CheckIndex(int[,,] arr, bool begin, bool row, int now = new int())
 
 void AddShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotation)
 {
-
     for (int k = 0; k < array2.Length; k++)
     {
         array1[indI / 2, indJ / 2, 0] = array2[k];
@@ -130,8 +129,6 @@ void DeleteOldShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotat
         && (indI <= array1.GetLength(1) * 2 - 2 || indJ >= 0)) array1[helpI, helpJ + 1, 0] = 0;
         else if (key == ConsoleKey.UpArrow
         && (indJ <= array1.GetLength(0) * 2 - 2 || indI >= 0)) array1[helpI + 1, helpJ, 0] = 0;
-
-
         else if (key == ConsoleKey.RightArrow
            && (indJ > 0 || indJ < array1.GetLength(0) * 2 - 4)) array1[helpI, helpJ - 1, 0] = 0;
         else if (key == ConsoleKey.DownArrow
@@ -192,10 +189,10 @@ int[] booms = new int[2];
 bool quit = false;
 PrintText("Введите имена игроков. Если не хотите, то оставьте поля пустыми. \n");
 string player1 = AskName(1);
-if (player1 == "") player1 = "Игрок 1";
+if (player1 == "exit") player1 = "Игрок 1";
 NewLine();
 string player2 = AskName(2);
-if (player2 == "") player1 = "Игрок 2";
+if (player2 == "exit") player2 = "Игрок 2";
 string winner = String.Empty;
 
 
@@ -389,9 +386,12 @@ bool StartGame()
         }
     }
 }
+
 quit = PrintShips(field1, player1);
 if (!quit) quit = PrintShips(field2, player2);
 if (!quit) quit = StartGame();
 Console.Clear();
 if (quit) PrintText("Вы вышли из игры.");
 else PrintText($"Поздравляю, {winner}, вы победили!");
+
+Console.ReadLine();
