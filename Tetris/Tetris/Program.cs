@@ -30,7 +30,7 @@ int[,] ChooseFigure()
 
 void PrintField(int[,] arr)
 {
-    string line = "+--------------------+", vert = "|"; //одна ячейка - два пикселя в ширину
+    string line = "+--------------------+", vert = "|";
     for (int i = 0; i < arr.GetLength(0); i++)
     {
         if (i == 0)
@@ -73,7 +73,7 @@ void ReplaceFigure(int[,] arr, int[,] arr2, int i, int j, bool add)
 
 bool CheckCollision(int[,] arr, int[,] arr2, int i, int j)
 {
-    int helpI = i + arr2.GetLength(0) - 1; //последняя линия фигуры
+    int helpI = i + arr2.GetLength(0) - 1;
     if (helpI == arr.GetLength(0)) return true;
     for (int l = 0; l < arr2.GetLength(1); l++)
     {
@@ -140,8 +140,6 @@ int[,] Rotation(int[,] arr)
 
 bool CheckCollisionToSide(int[,] arr, int[,] arr2, int i, int j, bool right)
 {
-    //int helpI = i + arr2.GetLength(0) - 1; //последняя линия фигуры
-    //if (helpI == arr.GetLength(0)) return true;
     for (int l = 0; l < arr2.GetLength(0); l++)
     {
         if (right)
@@ -172,14 +170,11 @@ bool CheckCollisionToSide(int[,] arr, int[,] arr2, int i, int j, bool right)
     return false;
 }
 
-//сделать проверку на боковое столкновение
-
 int[,] field = new int[20, 10];
 int score = 0;
 bool anotherFigure = true;
-int i = 0, j = 4, checkLines = -1;
+int i = 0, j = 4, checkLines = -1, endOfGame = 0;
 int[,] figure = new int[4, 2];
-int endOfGame = 0;
 new Thread(() =>
 {
     while (true)
