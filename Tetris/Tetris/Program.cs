@@ -48,6 +48,9 @@ void PrintField(int[,] arr)
         NewLine();
         if (i == arr.GetLength(0) - 1) PrintText(line);
     }
+    PrintText("\nДля перемещения фигуры используйте стрелки 'влево' и 'вправо'." +
+        "\nДля поворота фигуры нажмите стрелку 'вверх'." +
+        "\nДля того, чтобы опустить фигуру нажмите стрелку 'вниз'.");
 }
 
 void ReplaceFigure(int[,] arr, int[,] arr2, int i, int j, bool add)
@@ -57,30 +60,34 @@ void ReplaceFigure(int[,] arr, int[,] arr2, int i, int j, bool add)
         int helpJ = j;
         for (int l = 0; l < arr2.GetLength(1); l++)
         {
-            if (add) arr[i, helpJ] = arr2[k, l];
-            else arr[i - 1, helpJ] = 0;
+            if (arr2[k, l] == 1)
+            {
+                if (add) arr[i, helpJ] = arr2[k, l];
+                else arr[i - 1, helpJ] = 0;
+            }
             helpJ++;
         }
         i++;
     }
 }
 
-bool CheckCollision(int[,] arr, int[,] arr2, int i, int j) //проверка по всему массиву, а нужно по единицам
-    //поиск по столбцам индекса единицы,проверка на клетку под единицей 
+bool CheckCollision(int[,] arr, int[,] arr2, int i, int j)
 {
-    try
+    int helpI = i + arr2.GetLength(0) - 1; //последняя линия фигуры
+    if (helpI == arr.GetLength(0)) return true;
+    for (int l = 0; l < arr2.GetLength(1); l++)
     {
-        for (int k = 0; k < arr2.GetLength(1); k++)
+        for (int k = arr2.GetLength(0) - 1; k >= 0; k--)
         {
-            if (arr[i + arr2.GetLength(0) - 1, j] != 0) return true;
-            k++;
+            if (arr2[k, l] == 1)
+            {
+                if (arr[i + k, j] == 1) return true;
+                break;
+            }
         }
-        return false;
+        j++;
     }
-    catch (System.IndexOutOfRangeException)
-    {
-        return true;
-    }
+    return false;
 }
 
 int CheckLines(int[,] arr)
@@ -133,87 +140,85 @@ int[,] Rotation(int[,] arr)
 
 int[,] field = new int[20, 10];
 int score = 0;
-
-bool StartGame(int[,] arr)
+bool anotherFigure = true;
+int i = 0, j = 4, checkLines = -1;
+int[,] figure = new int[4, 2];
+int endOfGame = 0;
+new Thread(() =>
 {
-    bool anotherFigure = true;
-    int i = 0, j = 4, checkLines = -1;
-    int[,] figure = new int[4, 2];
-    int endOfGame = 0;
-    new Thread(() =>
+    while (true)
     {
-        while (true)
+        Console.Clear();
+        if (endOfGame != 0)
         {
-            Console.Clear();
-            if (endOfGame != 0) break;
-            if (anotherFigure)
-            {
-                figure = ChooseFigure();
-                anotherFigure = false;
-                i = 0;
-                j = 4;
-            }
-            ReplaceFigure(field, figure, i++, j, true);
-            PrintField(field);
-            Thread.Sleep(500);
-            if (CheckCollision(field, figure, i, j))
-            {
-                if (i == 1) endOfGame = 2;
-                else anotherFigure = true;
-            }
-            else ReplaceFigure(field, figure, i, j, false);
-            checkLines = CheckLines(field);
-            if (checkLines != -1)
+            if (endOfGame == 1) PrintText("Вы вышли из игры.");
+            else PrintText($"Вы удалили {score} линий и набрали {score * 10} очков");
+            break;
+        }
+        if (anotherFigure)
+        {
+            figure = ChooseFigure();
+            anotherFigure = false;
+            i = 0;
+            j = 4;
+        }
+        ReplaceFigure(field, figure, i++, j, true);
+        PrintField(field);
+        Thread.Sleep(500);
+        if (CheckCollision(field, figure, i, j))
+        {
+            if (i == 1) endOfGame = 2;
+            else anotherFigure = true;
+        }
+        else ReplaceFigure(field, figure, i, j, false);
+        checkLines = CheckLines(field);
+        if (checkLines != -1)
+        {
+            while (checkLines != -1) //если сразу несколько линий оказались полными
             {
                 DeleteLine(field, checkLines);
                 score++;
-                anotherFigure = true;
+                checkLines = CheckLines(field);
             }
-        }
-    }).Start();
-
-    while (true)
-    {
-        if (endOfGame != 0) break;
-        var key = Console.ReadKey().Key;
-        if (key == ConsoleKey.LeftArrow && j > 0)
-        {
-            ReplaceFigure(field, figure, i, j, false);
-            j--;
-        }
-        else if (key == ConsoleKey.RightArrow 
-                && j < field.GetLength(1) - figure.GetLength(1))
-        {
-            ReplaceFigure(field, figure, i, j, false);
-            j++;
-        }
-        else if (key == ConsoleKey.Escape)
-        {
-            endOfGame = 1;
-        }
-        else if (key == ConsoleKey.DownArrow)
-        {
-            ReplaceFigure(field, figure, i, j, false);
-            while (!CheckCollision(field, figure, i, j))
-            {
-                i++;
-            }
-            ReplaceFigure(field, figure, i - 1, j, true);
             anotherFigure = true;
         }
-        else if (key == ConsoleKey.UpArrow)
-        {
-            ReplaceFigure(field, figure, i, j, false);
-            figure = Rotation(figure);
-        }
     }
-    Console.Clear();
-    if (endOfGame == 1) return true;
-    else return false;
-}
+}).Start();
 
-bool quit = false;
-quit = StartGame(field);
-if (quit) PrintText("Вы вышли из игры.");
-else PrintText($"Вы удалили {score} линий и набрали {score * 10} очков");
-Console.ReadLine();
+while (true)
+{
+    var key = Console.ReadKey().Key;
+    if (endOfGame != 0) break;
+    if (key == ConsoleKey.LeftArrow && j > 0)
+    {
+        ReplaceFigure(field, figure, i, j, false);
+        j--;
+    }
+    else if (key == ConsoleKey.RightArrow
+            && j < field.GetLength(1) - figure.GetLength(1))
+    {
+        ReplaceFigure(field, figure, i, j, false);
+        j++;
+    }
+    else if (key == ConsoleKey.Escape)
+    {
+        endOfGame = 1;
+    }
+    else if (key == ConsoleKey.DownArrow)
+    {
+        ReplaceFigure(field, figure, i, j, false);
+        while (!CheckCollision(field, figure, i, j))
+        {
+            i++;
+        }
+        ReplaceFigure(field, figure, i - 1, j, true);
+        anotherFigure = true;
+    }
+    else if (key == ConsoleKey.UpArrow)
+    {
+        ReplaceFigure(field, figure, i, j, false);
+        figure = Rotation(figure);
+        if (j + figure.GetLength(1) > field.GetLength(1)) j -= figure.GetLength(1) - 1;
+    }
+}
+Console.Clear();
