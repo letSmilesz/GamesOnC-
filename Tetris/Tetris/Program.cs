@@ -138,6 +138,42 @@ int[,] Rotation(int[,] arr)
     return arr2;
 }
 
+bool CheckCollisionToSide(int[,] arr, int[,] arr2, int i, int j, bool right)
+{
+    //int helpI = i + arr2.GetLength(0) - 1; //последняя линия фигуры
+    //if (helpI == arr.GetLength(0)) return true;
+    for (int l = 0; l < arr2.GetLength(0); l++)
+    {
+        if (right)
+        {
+            for (int k = arr2.GetLength(1) - 1; k >= 0; k--)
+            {
+                if (arr2[l,k] == 1)
+                {
+                    if (arr[i, j + k + 1] == 1) return true;
+                    break;
+                }
+            }
+            i++;
+        }
+        else
+        {
+            for (int k = 0; k < arr2.GetLength(1); k++)
+            {
+                if (arr2[l, k] == 1)
+                {
+                    if (arr[i, j - k - 1] == 1) return true;
+                    break;
+                }
+            }
+            i++;
+        }
+    }
+    return false;
+}
+
+//сделать проверку на боковое столкновение
+
 int[,] field = new int[20, 10];
 int score = 0;
 bool anotherFigure = true;
@@ -190,13 +226,15 @@ while (true)
     var key = Console.ReadKey().Key;
     Thread.Sleep(250);
     if (endOfGame != 0) break;
-    if (key == ConsoleKey.LeftArrow && j > 0)
+    if (key == ConsoleKey.LeftArrow && j > 0
+            && !CheckCollisionToSide(field, figure, i, j, false))
     {
         ReplaceFigure(field, figure, i, j, false);
         j--;
     }
     else if (key == ConsoleKey.RightArrow
-            && j < field.GetLength(1) - figure.GetLength(1))
+            && j < field.GetLength(1) - figure.GetLength(1)
+            && !CheckCollisionToSide(field, figure, i, j, true))
     {
         ReplaceFigure(field, figure, i, j, false);
         j++;
