@@ -188,6 +188,7 @@ new Thread(() =>
 while (true)
 {
     var key = Console.ReadKey().Key;
+    Thread.Sleep(250);
     if (endOfGame != 0) break;
     if (key == ConsoleKey.LeftArrow && j > 0)
     {
@@ -221,4 +222,3 @@ while (true)
         if (j + figure.GetLength(1) > field.GetLength(1)) j -= figure.GetLength(1) - 1;
     }
 }
-Console.Clear();
