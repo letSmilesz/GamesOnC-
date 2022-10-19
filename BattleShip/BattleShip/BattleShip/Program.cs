@@ -34,13 +34,13 @@ dynamic UserEnter()
     }
 }
 
-int[] Ships(int howMuchShips)
+int[,] Ships(int howMuchShips)
 {
-    int[] linkor = new int[4] { 3, 3, 3, 3 };//1
-    int[] kreyser = new int[3] { 3, 3, 3 };//2 
-    int[] esminec = new int[2] { 3, 3 };//3
-    int[] kater = new int[1] { 3 };//4
-    int[] stop = new int[1] { 0 };
+    int[,] linkor = new int[1, 4] { { 3, 3, 3, 3 } };//1
+    int[,] kreyser = new int[1, 3] { { 0, 3, 3 } };//2  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    int[,] esminec = new int[1, 2] { { 3, 3 } };//3
+    int[,] kater = new int[1, 1] { { 3 } };//4
+    int[,] stop = new int[1, 1] { { 0 } };
 
     if (howMuchShips == 0) return linkor;
     else if (howMuchShips < 3) return kreyser;
@@ -99,7 +99,7 @@ int CheckIndex(int[,,] arr, bool begin, bool row, int now = new int())
                     if (row) return i;
                     else return j;
                 }
-            } 
+            }
             else if (now == 0)
             {
                 if (row) return i;
@@ -110,66 +110,45 @@ int CheckIndex(int[,,] arr, bool begin, bool row, int now = new int())
     return 0;
 }
 
-void AddShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotation)
+void AddShip(int[,,] array1, int[,] array2, int i, int j, int layer)
 {
-    for (int k = 0; k < array2.Length; k++)
+    for (int k = 0; k < array2.GetLength(0); k++)
     {
-        array1[indI / 2, indJ / 2, 0] = array2[k];
-        if (rotation) indI += 2;
-        else indJ += 2;
-    }
-}
-
-void DeleteOldShip2(int[,,] array1, int[] array2, int indI, int indJ, bool rotation, System.ConsoleKey key)
-{
-    int helpJ = indJ / 2, helpI = indI / 2;
-    for (int k = 0; k < array2.Length; k++)
-    {
-        if (key == ConsoleKey.LeftArrow
-        && (indI <= array1.GetLength(1) * 2 - 2 || indJ >= 0)) array1[helpI, helpJ + 1, 0] = 0;
-        else if (key == ConsoleKey.UpArrow
-        && (indJ <= array1.GetLength(0) * 2 - 2 || indI >= 0)) array1[helpI + 1, helpJ, 0] = 0;
-        else if (key == ConsoleKey.RightArrow
-           && (indJ > 0 || indJ < array1.GetLength(0) * 2 - 4)) array1[helpI, helpJ - 1, 0] = 0;
-        else if (key == ConsoleKey.DownArrow
-                    && (indJ >= 0 || indI <= array1.GetLength(1) * 2 - 2)) array1[helpI - 1, helpJ, 0] = 0;
-        else if (key == ConsoleKey.Z)
+        int helpJ = j;
+        for (int l = 0; l < array2.GetLength(1); l++)
         {
-            array1[helpI, helpJ, 0] = 0;
-        }
-        if (rotation) helpI++;
-        else helpJ++;
-    }
-}
-
-bool CheckFreeCells(int[,,] arr, int[] arr2, bool rotation, int helpI, int helpJ)
-{
-    for (int k = 0; k < arr2.Length + 2; k++) //для проверки свободных ячеек вокруг корабля и корабля 
-    {
-        if (rotation)
-        {
-            if (helpI < arr.GetLength(0) - 1
-                && arr[helpI, helpJ, 1] != 0) return false;
-            if (helpJ > 0
-                 && helpI < arr.GetLength(0) - 1
-                && arr[helpI, helpJ - 1, 1] != 0) return false;
-            if (helpJ < arr.GetLength(1) - 1
-                && helpI < arr.GetLength(0) - 1
-                && arr[helpI, helpJ + 1, 1] != 0) return false;
-            helpI++;
-        }
-        else
-        {
-            if (helpJ < arr.GetLength(1) - 1
-                && arr[helpI, helpJ, 1] != 0) return false;
-            if (helpI > 0
-                 && helpJ < arr.GetLength(1) - 1
-                && arr[helpI - 1, helpJ, 1] != 0) return false;
-            if (helpI < arr.GetLength(0) - 1
-                && helpJ < arr.GetLength(1) - 1
-                && arr[helpI + 1, helpJ, 1] != 0) return false;
+            array1[i, helpJ, layer] = array2[k, l];
             helpJ++;
         }
+        i++;
+    }
+}
+
+void DeleteOldShip2(int[,,] array1)
+{
+    for (int i = 0; i < array1.GetLength(0); i++)
+    {
+        for (int j = 0; j < array1.GetLength(1); j++)
+        {
+            array1[i, j, 0] = 0;
+        }
+    }
+}
+
+bool CheckFreeCells(int[,,] arr, int[,] arr2, int i, int j)
+{
+    for (int k = 0; k < arr2.GetLength(0) + 2; k++) //для проверки свободных ячеек вокруг корабля и корабля 
+    {
+        int helpJ = j;
+        for (int l = 0; l < arr2.GetLength(1) + 2; l++)
+        {
+            if (i < arr.GetLength(0) - 1 
+                && helpJ < arr.GetLength(1) - 1 
+                && helpJ >= 0 && i >= 0 
+                && arr[i, helpJ, 1] != 0) return false;
+            helpJ++;
+        }
+        i++;
     }
     return true;
 }
@@ -181,6 +160,90 @@ string AskName(int n)
     return name;
 }
 
+int[,] Rotation(int[,] arr)
+{
+    int[,] arr2 = new int[arr.GetLength(1), arr.GetLength(0)];
+    for (int i = 0; i < arr.GetLength(0); i++)
+    {
+        for (int j = 0; j < arr.GetLength(1); j++)
+        {
+            arr2[j, i] = arr[i, j];
+        }
+    }
+    return arr2;
+}
+
+void CheckWholeShip(int[,,] array, int i, int j)
+{
+    bool notWhole = false;
+    while (true)
+    {
+        if (i < array.GetLength(0)
+            && j < array.GetLength(1)
+            && j >= 0 && i > 0 
+            && array[i - 1, j, 1] == 2) i--;
+        else if (i < array.GetLength(0)
+            && j < array.GetLength(1)
+            && j > 0 && i >= 0 
+            && array[i, j - 1, 1] == 2) j--;
+        else if (i < array.GetLength(0)
+                && j < array.GetLength(1)
+                && j > 0 && i > 0 
+                && (array[i - 1, j, 1] == 3 || array[i, j - 1, 1] == 3))
+        {
+            notWhole = true;
+            break;
+        }
+        else break;
+    }
+    if (!notWhole)
+    {
+        int helpI = i, helpJ = j, right = 0, down = 0, idx = 0;
+        i--;
+        for (; true; idx++)
+        {
+            if (helpI != array.GetLength(0) - 1
+                && (array[helpI + 1, helpJ, 1] == 2 || array[helpI + 1, helpJ, 1] == 3))
+            {
+                if (array[helpI + 1, helpJ, 1] == 2) down++;
+                helpI++;
+            }
+            else if (helpJ != array.GetLength(1) - 1
+                && (array[helpI, helpJ + 1, 1] == 2 || array[helpI, helpJ + 1, 1] == 3))
+            {
+                if (array[helpI, helpJ + 1, 1] == 2) right++;
+                helpJ++;
+            }
+            else if (helpI == array.GetLength(0) - 1 
+                && helpJ == array.GetLength(1) - 1
+                && array[helpI + 1, helpJ, 1] == 0
+                && array[helpI, helpJ + 1, 1] == 0) break;
+        }
+        if (idx == right || idx == down)
+        {
+            int length = 3, height = down + 3;
+            if (right > down)
+            {
+                length = right + 3;
+                height = 3;
+            }
+            for (int k = 0; k < height; k++)
+            {
+                helpJ = j - 1;
+                for (int l = 0; l < length; l++)
+                {
+                    if (i <= array.GetLength(0) - 1
+                        && helpJ <= array.GetLength(1) - 1
+                        && helpJ >= 0 && i >= 0 
+                        && array[i, helpJ, 1] != 2) array[i, helpJ, 1] = 1;
+                    helpJ++;
+                }
+                i++;
+            }
+        }
+    }
+}
+
 
 bool begin = false;
 int[,,] field1 = new int[10, 10, 2];
@@ -188,22 +251,21 @@ int[,,] field2 = new int[10, 10, 2];
 int[] booms = new int[2];
 bool quit = false;
 PrintText("Введите имена игроков. Если не хотите, то оставьте поля пустыми. \n");
-string player1 = AskName(1);
-if (player1 == "exit") player1 = "Игрок 1";
+string player1 = /*AskName(1); !!!!!!!!!!!!!!!!!!!!!!
+if (player1 == "exit") player1 =*/ "Игрок 1";
 NewLine();
-string player2 = AskName(2);
-if (player2 == "exit") player2 = "Игрок 2";
+string player2 = /*AskName(2);!!!!!!!!!!!!!!!!
+if (player2 == "exit") player2 = */"Игрок 2";
 string winner = String.Empty;
 
 
 bool PrintShips(int[,,] field, string player)
 {
     int howMuchShips = 0;
-    bool rotation = false;
     while (true)
     {
-        int[] actualShip = Ships(howMuchShips);
-        if (actualShip[0] == 0) return false;
+        int[,] actualShip = Ships(howMuchShips);
+        if (actualShip[0, 0] == 0) return false;
         else
         {
             int i = CheckIndex(field, begin, true);
@@ -211,73 +273,42 @@ bool PrintShips(int[,,] field, string player)
             while (true)
             {
                 Console.Clear();
-                AddShip2(field, actualShip, i, j, rotation);
+                AddShip(field, actualShip, i, j, 0);
                 PrintField(field, begin, 0);
                 NewLine();
                 PrintText($"Поле {player}. \nДля перемещения курсора используйте стрелочки. \nДля поворота корабля - 'Z/Я'. " +
                     $"\nДля сохранения позиции корабля - пробел. \nКорабли не могут располагаться впритык друг к другу.");
-                Console.SetCursorPosition(j, i);
+                Console.SetCursorPosition(j * 2, i * 2);
                 var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.LeftArrow && j > 0) j -= 2;
+                if (key == ConsoleKey.LeftArrow && j > 0) j--;
                 else if (key == ConsoleKey.RightArrow)
                 {
-                    if (rotation && j < field.GetLength(1) * 2 - 2) j += 2;
-                    else if (!rotation &&
-                        j / 2 < field.GetLength(1) - actualShip.Length) j += 2;
+                    if (j < field.GetLength(1) - actualShip.GetLength(1)) j++;
                 }
-                else if (key == ConsoleKey.UpArrow && i > 0) i -= 2;
+                else if (key == ConsoleKey.UpArrow && i > 0) i--;
                 else if (key == ConsoleKey.DownArrow)
                 {
-                    if (rotation
-                        && i / 2 < field.GetLength(0) - actualShip.Length) i += 2;
-                    else if (!rotation &&
-                        i < field.GetLength(0) * 2 - 2) i += 2;
+                    if (i < field.GetLength(0) - actualShip.GetLength(0)) i++;
                 }
-                DeleteOldShip2(field, actualShip, i, j, rotation, key);
+                DeleteOldShip2(field);
                 if (key == ConsoleKey.Spacebar)
                 {
-                    int helpI = i / 2;
-                    int helpJ = j / 2 - 1;
-                    if (j == 0) helpJ = j / 2;
-
-                    if (rotation)
-                    {
-                        helpJ = j / 2;
-                        helpI = i / 2 - 1;
-                        if (i == 0) helpI = i / 2;
-                    }
-                    bool check = CheckFreeCells(field, actualShip, rotation, helpI, helpJ);
+                    bool check = CheckFreeCells(field, actualShip, i - 1, j - 1);
 
                     if (check)//проверить занятость всех клеток
                     {
-                        for (int k = 0; k < actualShip.Length; k++)
-                        {
-                            field[i / 2, j / 2, 1] = actualShip[k];
-                            if (rotation) i += 2;
-                            else j += 2;
-                        }
+                        AddShip(field, actualShip, i, j, 1);
                         howMuchShips++;
                         break;
                     }
                 }
                 else if (key == ConsoleKey.Z)
                 {
-                    if (rotation)
-                    {
-                        rotation = false;
-                        if (j / 2 + actualShip.Length > field.GetLength(1))
-                        {
-                            j = (field.GetLength(1) - actualShip.Length) * 2;
-                        }
-                    }
-                    else
-                    {
-                        rotation = true;
-                        if (i + actualShip.Length > field.GetLength(0))
-                        {
-                            i = (field.GetLength(0) - actualShip.Length) * 2;
-                        }
-                    }
+                    actualShip = Rotation(actualShip);
+                    if (j + actualShip.GetLength(1) > field.GetLength(1))
+                        j = field.GetLength(1) - actualShip.Length;
+                    else if (i + actualShip.GetLength(0) > field.GetLength(0))
+                        i = field.GetLength(0) - actualShip.Length;
                 }
                 else if (key == ConsoleKey.Escape)
                 {
@@ -339,7 +370,7 @@ bool StartGame()
                 playerNow = 1;
                 playerNowText = player1;
                 changePlayer = false;
-                first= true;
+                first = true;
                 continue;
             }
         }
@@ -356,6 +387,7 @@ bool StartGame()
                 {
                     field2[i, j, 1] = 2;
                     booms[0]++;
+                    CheckWholeShip(field2, i, j);
                 }
                 else
                 {
@@ -369,6 +401,7 @@ bool StartGame()
                 {
                     field1[i, j, 1] = 2;
                     booms[1]++;
+                    CheckWholeShip(field1, i, j);
                 }
                 else
                 {
