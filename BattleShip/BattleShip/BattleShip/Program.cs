@@ -37,7 +37,7 @@ dynamic UserEnter()
 int[,] Ships(int howMuchShips)
 {
     int[,] linkor = new int[1, 4] { { 3, 3, 3, 3 } };//1
-    int[,] kreyser = new int[1, 3] { { 0, 3, 3 } };//2  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    int[,] kreyser = new int[1, 3] { { 3, 3, 3 } };//2  
     int[,] esminec = new int[1, 2] { { 3, 3 } };//3
     int[,] kater = new int[1, 1] { { 3 } };//4
     int[,] stop = new int[1, 1] { { 0 } };
@@ -52,16 +52,17 @@ int[,] Ships(int howMuchShips)
 void PrintField(int[,,] arr, bool begin, int left, int now = new int())
 {
     string line = "-+-+-+-+-+-+-+-+-+-", vert = "|";
-    for (int i = 0; i / 2 < arr.GetLength(0); i += 2)
+    int indI = 0;
+    for (int i = 1; i < arr.GetLength(0) - 1; i++)
     {
-        Console.SetCursorPosition(left, i);
-        for (int j = 0; j < arr.GetLength(1); j++)
+        Console.SetCursorPosition(left, indI++);
+        for (int j = 1; j < arr.GetLength(1) - 1; j++)
         {
-            if (begin) now = arr[i / 2, j, 1];
+            if (begin) now = arr[i, j, 1];
             else
             {
-                if (arr[i / 2, j, 1] != 0) arr[i / 2, j, 0] = arr[i / 2, j, 1];
-                now = arr[i / 2, j, 0];
+                if (arr[i, j, 1] != 0) arr[i, j, 0] = arr[i, j, 1];
+                now = arr[i, j, 0];
             }
 
             if (now == 0) PrintText(" ");//ничего
@@ -77,9 +78,9 @@ void PrintField(int[,,] arr, bool begin, int left, int now = new int())
                 PrintText($"{vert}");
             }
         }
-        if (i / 2 < arr.GetLength(0) - 1)
+        if (i < arr.GetLength(0) - 1)
         {
-            Console.SetCursorPosition(left, i + 1);
+            Console.SetCursorPosition(left, indI++);
             PrintText(line);
         }
     }
@@ -87,9 +88,9 @@ void PrintField(int[,,] arr, bool begin, int left, int now = new int())
 
 int CheckIndex(int[,,] arr, bool begin, bool row, int now = new int())
 {
-    for (int i = 0; i < arr.GetLength(0); i++)
+    for (int i = 1; i < arr.GetLength(0) - 1; i++)
     {
-        for (int j = 0; j < arr.GetLength(1); j++)
+        for (int j = 1; j < arr.GetLength(1) - 1; j++)
         {
             now = arr[i, j, 1];
             if (begin)
@@ -142,10 +143,7 @@ bool CheckFreeCells(int[,,] arr, int[,] arr2, int i, int j)
         int helpJ = j;
         for (int l = 0; l < arr2.GetLength(1) + 2; l++)
         {
-            if (i < arr.GetLength(0) - 1 
-                && helpJ < arr.GetLength(1) - 1 
-                && helpJ >= 0 && i >= 0 
-                && arr[i, helpJ, 1] != 0) return false;
+            if (arr[i, helpJ, 1] != 0) return false;
             helpJ++;
         }
         i++;
@@ -175,89 +173,58 @@ int[,] Rotation(int[,] arr)
 
 void CheckWholeShip(int[,,] array, int i, int j)
 {
-    bool notWhole = false;
     while (true)
     {
-        if (i < array.GetLength(0)
-            && j < array.GetLength(1)
-            && j >= 0 && i > 0 
-            && array[i - 1, j, 1] == 2) i--;
-        else if (i < array.GetLength(0)
-            && j < array.GetLength(1)
-            && j > 0 && i >= 0 
-            && array[i, j - 1, 1] == 2) j--;
-        else if (i < array.GetLength(0)
-                && j < array.GetLength(1)
-                && j > 0 && i > 0 
-                && (array[i - 1, j, 1] == 3 || array[i, j - 1, 1] == 3))
-        {
-            notWhole = true;
-            break;
-        }
+        if (array[i - 1, j, 1] == 2) i--;
+        else if (array[i, j - 1, 1] == 2) j--;
+        else if (array[i - 1, j, 1] == 3 || array[i, j - 1, 1] == 3) return;
         else break;
     }
-    if (!notWhole)
+    int helpI = i, helpJ = j, right = 0, down = 0;
+    while (true)
     {
-        int helpI = i, helpJ = j, right = 0, down = 0, idx = 0;
-        i--;
-        for (; true; idx++)
+        if (array[helpI + 1, helpJ, 1] == 2)
         {
-            if (helpI != array.GetLength(0) - 1
-                && (array[helpI + 1, helpJ, 1] == 2 || array[helpI + 1, helpJ, 1] == 3))
-            {
-                if (array[helpI + 1, helpJ, 1] == 2) down++;
-                helpI++;
-            }
-            else if (helpJ != array.GetLength(1) - 1
-                && (array[helpI, helpJ + 1, 1] == 2 || array[helpI, helpJ + 1, 1] == 3))
-            {
-                if (array[helpI, helpJ + 1, 1] == 2) right++;
-                helpJ++;
-            }
-            else if (helpI == array.GetLength(0) - 1 
-                && helpJ == array.GetLength(1) - 1
-                && array[helpI + 1, helpJ, 1] == 0
-                && array[helpI, helpJ + 1, 1] == 0) break;
+            if (array[helpI + 1, helpJ, 1] == 2) down++;
+            helpI++;
         }
-        if (idx == right || idx == down)
+        else if (array[helpI, helpJ + 1, 1] == 2)
         {
-            int length = 3, height = down + 3;
-            if (right > down)
-            {
-                length = right + 3;
-                height = 3;
-            }
-            for (int k = 0; k < height; k++)
-            {
-                helpJ = j - 1;
-                for (int l = 0; l < length; l++)
-                {
-                    if (i <= array.GetLength(0) - 1
-                        && helpJ <= array.GetLength(1) - 1
-                        && helpJ >= 0 && i >= 0 
-                        && array[i, helpJ, 1] != 2) array[i, helpJ, 1] = 1;
-                    helpJ++;
-                }
-                i++;
-            }
+            if (array[helpI, helpJ + 1, 1] == 2) right++;
+            helpJ++;
         }
+        else if (array[helpI, helpJ + 1, 1] == 3 || array[helpI + 1, helpJ, 1] == 3) return;
+        else break;
+    }
+    int length = 3, height = down + 3;
+    if (right > down)
+    {
+        length = right + 3;
+        height = 3;
+    }
+    for (int k = 0; k < height; k++)
+    {
+        helpJ = j - 1;
+        for (int l = 0; l < length; l++)
+        {
+            if (array[i - 1, helpJ, 1] != 2) array[i - 1, helpJ, 1] = 1;
+            helpJ++;
+        }
+        i++;
     }
 }
 
-
 bool begin = false;
-int[,,] field1 = new int[10, 10, 2];
-int[,,] field2 = new int[10, 10, 2];
+int[,,] field1 = new int[12, 12, 2];
+int[,,] field2 = new int[12, 12, 2];
 int[] booms = new int[2];
-bool quit = false;
 PrintText("Введите имена игроков. Если не хотите, то оставьте поля пустыми. \n");
-string player1 = /*AskName(1); !!!!!!!!!!!!!!!!!!!!!!
-if (player1 == "exit") player1 =*/ "Игрок 1";
+string player1 = AskName(1);
+if (player1 == "exit") player1 = "Игрок 1";
 NewLine();
-string player2 = /*AskName(2);!!!!!!!!!!!!!!!!
-if (player2 == "exit") player2 = */"Игрок 2";
+string player2 = AskName(2);
+if (player2 == "exit") player2 = "Игрок 2";
 string winner = String.Empty;
-
 
 bool PrintShips(int[,,] field, string player)
 {
@@ -278,23 +245,18 @@ bool PrintShips(int[,,] field, string player)
                 NewLine();
                 PrintText($"Поле {player}. \nДля перемещения курсора используйте стрелочки. \nДля поворота корабля - 'Z/Я'. " +
                     $"\nДля сохранения позиции корабля - пробел. \nКорабли не могут располагаться впритык друг к другу.");
-                Console.SetCursorPosition(j * 2, i * 2);
+                Console.SetCursorPosition((j - 1) * 2, (i - 1) * 2);
                 var key = Console.ReadKey(true).Key;
-                if (key == ConsoleKey.LeftArrow && j > 0) j--;
-                else if (key == ConsoleKey.RightArrow)
-                {
-                    if (j < field.GetLength(1) - actualShip.GetLength(1)) j++;
-                }
-                else if (key == ConsoleKey.UpArrow && i > 0) i--;
-                else if (key == ConsoleKey.DownArrow)
-                {
-                    if (i < field.GetLength(0) - actualShip.GetLength(0)) i++;
-                }
+                if (key == ConsoleKey.LeftArrow && j > 1) j--;
+                else if (key == ConsoleKey.RightArrow
+                    && (j < field.GetLength(1) - actualShip.GetLength(1) - 1)) j++;
+                else if (key == ConsoleKey.UpArrow && i > 1) i--;
+                else if (key == ConsoleKey.DownArrow
+                    && (i < field.GetLength(0) - actualShip.GetLength(0) - 1)) i++;
                 DeleteOldShip2(field);
                 if (key == ConsoleKey.Spacebar)
                 {
                     bool check = CheckFreeCells(field, actualShip, i - 1, j - 1);
-
                     if (check)//проверить занятость всех клеток
                     {
                         AddShip(field, actualShip, i, j, 1);
@@ -305,10 +267,10 @@ bool PrintShips(int[,,] field, string player)
                 else if (key == ConsoleKey.Z)
                 {
                     actualShip = Rotation(actualShip);
-                    if (j + actualShip.GetLength(1) > field.GetLength(1))
-                        j = field.GetLength(1) - actualShip.Length;
-                    else if (i + actualShip.GetLength(0) > field.GetLength(0))
-                        i = field.GetLength(0) - actualShip.Length;
+                    if (j + actualShip.GetLength(1) > field.GetLength(1) - 1)
+                        j = field.GetLength(1) - actualShip.Length - 1;
+                    else if (i + actualShip.GetLength(0) > field.GetLength(0) - 1)
+                        i = field.GetLength(0) - actualShip.Length - 1;
                 }
                 else if (key == ConsoleKey.Escape)
                 {
@@ -341,7 +303,7 @@ bool StartGame()
             PrintField(field1, begin, 25);
             NewLine();
             PrintText($"Ходит {playerNowText}");
-            Console.SetCursorPosition(j * 2, i * 2);
+            Console.SetCursorPosition((j - 1) * 2, (i - 1) * 2);
             if (changePlayer)
             {
                 playerNow = 2;
@@ -364,7 +326,7 @@ bool StartGame()
             PrintField(field2, begin, 25);
             NewLine();
             PrintText($"Ходит {playerNowText}");
-            Console.SetCursorPosition(j * 2, i * 2);
+            Console.SetCursorPosition((j - 1) * 2, (i - 1) * 2);
             if (changePlayer)
             {
                 playerNow = 1;
@@ -375,10 +337,10 @@ bool StartGame()
             }
         }
         var key = Console.ReadKey(true).Key;
-        if (key == ConsoleKey.LeftArrow && j > 0) j--;
-        else if (key == ConsoleKey.RightArrow && j < field2.GetLength(1) - 1) j++;
-        else if (key == ConsoleKey.UpArrow && i > 0) i--;
-        else if (key == ConsoleKey.DownArrow && i < field2.GetLength(0) - 1) i++;
+        if (key == ConsoleKey.LeftArrow && j > 1) j--;
+        else if (key == ConsoleKey.RightArrow && j < field2.GetLength(1) - 2) j++;
+        else if (key == ConsoleKey.UpArrow && i > 1) i--;
+        else if (key == ConsoleKey.DownArrow && i < field2.GetLength(0) - 2) i++;
         else if (key == ConsoleKey.Spacebar)
         {
             if (playerNow == 1)
@@ -420,11 +382,10 @@ bool StartGame()
     }
 }
 
-quit = PrintShips(field1, player1);
+bool quit = PrintShips(field1, player1);
 if (!quit) quit = PrintShips(field2, player2);
 if (!quit) quit = StartGame();
 Console.Clear();
 if (quit) PrintText("Вы вышли из игры.");
 else PrintText($"Поздравляю, {winner}, вы победили!");
-
 Console.ReadLine();
